@@ -108,7 +108,7 @@ Run the current gate:
 .\.venv\Scripts\pip-audit.exe --skip-editable
 ```
 
-The latest local gate has 33 passing tests and 90% reported coverage. That
+The latest local gate has 34 passing tests and 90% reported coverage. That
 evidence covers the local adapters and current API/worker paths only. It
 does not prove PostgreSQL, S3, SQS, LocalStack, container, CI, or deployment
 behavior.

@@ -56,6 +56,18 @@ services:
       migrate:
         condition: service_completed_successfully
     environment: *runtime-environment
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "from cloudfileflow.config import Settings; from cloudfileflow.database import create_database; from cloudfileflow.migrations import verify_database_revision; s=Settings(); engine,_=create_database(s.database_url); verify_database_revision(engine,s.database_url); engine.dispose()",
+        ]
+      interval: 10s
+      timeout: 3s
+      start_period: 10s
+      retries: 5
     restart: unless-stopped
 
 volumes:
