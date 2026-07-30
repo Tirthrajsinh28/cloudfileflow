@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.0] - 2026-07-30
 
 - Build the CloudFileFlow local file-ingestion slice with bounded uploads,
   quarantine storage, metadata persistence, job state, audit records,
@@ -15,6 +15,8 @@
   issue template with no-secret and synthetic-file guidance.
 - Add local verification evidence for Ruff, strict mypy, pytest/coverage,
   Alembic, runtime smoke checks, build locks, and dependency audit.
+- Add public GitHub Actions verification for the local SQLite/filesystem
+  adapter stack, including verify and container/Compose jobs.
 
-Cloud emulator adapters, Docker/LocalStack execution, remote GitHub Actions,
-deployment, screenshots, and release tag remain pending.
+Cloud emulator adapters, LocalStack/S3/SQS/PostgreSQL execution, external
+deployment, and screenshots/demo media remain pending.
