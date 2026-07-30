@@ -7,7 +7,9 @@ from sqlalchemy import engine_from_config, pool
 from cloudfileflow.database import Base, ensure_sqlite_parent_directory
 
 configuration = context.config
-database_url = environ.get("CLOUDFILEFLOW_DATABASE_URL")
+database_url = configuration.attributes.get("cloudfileflow_explicit_database_url") or environ.get(
+    "CLOUDFILEFLOW_DATABASE_URL"
+)
 if database_url:
     configuration.set_main_option("sqlalchemy.url", database_url.replace("%", "%%"))
 

@@ -13,6 +13,7 @@ def alembic_config(database_url: str) -> Config:
         environ.get("CLOUDFILEFLOW_PROJECT_ROOT", Path(__file__).resolve().parents[2])
     )
     configuration = Config(project_root / "alembic.ini")
+    configuration.attributes["cloudfileflow_explicit_database_url"] = database_url
     configuration.set_main_option("sqlalchemy.url", database_url.replace("%", "%%"))
     return configuration
 

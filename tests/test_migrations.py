@@ -64,6 +64,30 @@ def test_sqlite_database_parent_directory_is_created(tmp_path: Path) -> None:
         engine.dispose()
 
 
+def test_programmatic_migration_uses_explicit_url_when_environment_is_set(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    env_database_url = f"sqlite:///{tmp_path / 'environment.sqlite3'}"
+    explicit_settings = settings_for(tmp_path / "explicit")
+    monkeypatch.setenv("CLOUDFILEFLOW_DATABASE_URL", env_database_url)
+
+    upgrade_database(explicit_settings.database_url)
+
+    application = create_app(explicit_settings)
+    with TestClient(application) as client:
+        response = client.get("/health")
+
+    assert response.status_code == 200
+    explicit_engine, _ = create_database(explicit_settings.database_url)
+    env_engine, _ = create_database(env_database_url)
+    try:
+        assert "alembic_version" in inspect(explicit_engine).get_table_names()
+        assert "alembic_version" not in inspect(env_engine).get_table_names()
+    finally:
+        explicit_engine.dispose()
+        env_engine.dispose()
+
+
 def test_migration_constraints_reject_invalid_file_and_orphan_job(tmp_path: Path) -> None:
     settings = settings_for(tmp_path, auto_migrate=True)
     application = create_app(settings)
