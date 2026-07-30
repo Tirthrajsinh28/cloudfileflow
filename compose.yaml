@@ -1,0 +1,62 @@
+x-database-environment: &database-environment
+  CLOUDFILEFLOW_DATABASE_URL: sqlite:////data/cloudfileflow.sqlite3
+
+x-runtime-environment: &runtime-environment
+  <<: *database-environment
+  CLOUDFILEFLOW_STORAGE_ROOT: /data/storage
+  CLOUDFILEFLOW_AUTO_MIGRATE: "false"
+  CLOUDFILEFLOW_JWT_SECRET: ${CLOUDFILEFLOW_JWT_SECRET:?set CLOUDFILEFLOW_JWT_SECRET}
+  CLOUDFILEFLOW_JWT_ISSUER: ${CLOUDFILEFLOW_JWT_ISSUER:-cloudfileflow-local}
+  CLOUDFILEFLOW_OPERATOR_OWNER_ID: ${CLOUDFILEFLOW_OPERATOR_OWNER_ID:?set CLOUDFILEFLOW_OPERATOR_OWNER_ID}
+  CLOUDFILEFLOW_MAX_FILE_BYTES: ${CLOUDFILEFLOW_MAX_FILE_BYTES:-5242880}
+  CLOUDFILEFLOW_WORKER_MAX_ATTEMPTS: ${CLOUDFILEFLOW_WORKER_MAX_ATTEMPTS:-3}
+  CLOUDFILEFLOW_WORKER_RETRY_BASE_SECONDS: ${CLOUDFILEFLOW_WORKER_RETRY_BASE_SECONDS:-5}
+  CLOUDFILEFLOW_WORKER_CLAIM_TIMEOUT_SECONDS: ${CLOUDFILEFLOW_WORKER_CLAIM_TIMEOUT_SECONDS:-300}
+  CLOUDFILEFLOW_WORKER_POLL_SECONDS: ${CLOUDFILEFLOW_WORKER_POLL_SECONDS:-1}
+
+x-runtime-hardening: &runtime-hardening
+  init: true
+  read_only: true
+  tmpfs:
+    - /tmp:size=16m,mode=1777
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  volumes:
+    - cloudfileflow-data:/data
+
+services:
+  migrate:
+    <<: *runtime-hardening
+    build:
+      context: .
+    command: ["alembic", "upgrade", "head"]
+    environment: *database-environment
+    restart: "no"
+
+  api:
+    <<: *runtime-hardening
+    build:
+      context: .
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment: *runtime-environment
+    ports:
+      - "127.0.0.1:8085:8080"
+    restart: unless-stopped
+
+  worker:
+    <<: *runtime-hardening
+    build:
+      context: .
+    command: ["cloudfileflow-worker-daemon"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment: *runtime-environment
+    restart: unless-stopped
+
+volumes:
+  cloudfileflow-data:

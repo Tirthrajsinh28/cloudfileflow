@@ -1,0 +1,40 @@
+name: Bug report
+description: Report a reproducible CloudFileFlow upload, worker, authorization, or operations defect.
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Observed behavior
+      description: Include the API route, worker command, job status, and redacted output when relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: Explain the expected upload, validation, retry, dead-letter, download, or audit behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: fixture
+    attributes:
+      label: Minimal synthetic fixture
+      description: Use safe synthetic PDF, JSON, or text examples only. Do not attach confidential files or candidate records.
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification already attempted
+      description: List Ruff, mypy, pytest, Alembic, runtime, or Docker/LocalStack checks already run.
+    validations:
+      required: false
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: This report does not include secrets, malware samples, confidential documents, or private personal records.
+          required: true
