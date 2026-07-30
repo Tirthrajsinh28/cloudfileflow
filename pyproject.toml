@@ -25,7 +25,7 @@ cloudfileflow-worker-daemon = "cloudfileflow.worker_daemon:main"
 
 [project.optional-dependencies]
 dev = [
-  "coverage==7.15.0",
+  "coverage==7.15.2",
   "httpx2==2.5.0",
   "mypy==2.1.0",
   "pip-audit==2.10.1",
