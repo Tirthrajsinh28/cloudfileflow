@@ -310,3 +310,64 @@ def test_operator_job_view_is_bounded_and_fail_closed(tmp_path: Path) -> None:
     assert "owner" not in operator.text
     assert non_operator.status_code == 403
     assert anonymous.status_code == 401
+
+
+def test_operator_can_replay_dead_letter_job_with_audit(tmp_path: Path) -> None:
+    application = create_app(settings_for(tmp_path))
+    with TestClient(application) as client:
+        upload(client, b"synthetic", "text/plain")
+
+        def unavailable_validator(path: Path, media_type: str) -> str:
+            del path, media_type
+            raise OSError("temporary adapter outage")
+
+        worker = worker_for(application, unavailable_validator)
+        start = datetime.now(UTC) + timedelta(seconds=1)
+        worker.run_once(start)
+        worker.run_once(start + timedelta(seconds=10))
+        worker.run_once(start + timedelta(seconds=30))
+
+        _, dead_letter_job, _ = database_records(application.state.session_factory)
+        replay = client.post(
+            f"/api/v1/operations/jobs/{dead_letter_job.id}/replay",
+            headers=bearer(),
+        )
+        non_operator_replay = client.post(
+            f"/api/v1/operations/jobs/{dead_letter_job.id}/replay",
+            headers=bearer(OTHER_OWNER_ID),
+        )
+        replayed = worker_for(application).run_once(start + timedelta(seconds=31))
+
+    _, job, events = database_records(application.state.session_factory)
+    assert replay.status_code == 200
+    assert replay.json() == {
+        "id": str(dead_letter_job.id),
+        "file_id": str(dead_letter_job.file_id),
+        "state": "PENDING",
+        "attempt_count": 0,
+    }
+    assert non_operator_replay.status_code == 403
+    assert replayed is not None and replayed.state == "COMPLETED"
+    assert job.id == dead_letter_job.id
+    assert job.state == "COMPLETED"
+    assert job.attempt_count == 1
+    assert job.last_error is None
+    actions = [event.action for event in events]
+    assert actions.count("FILE_QUARANTINED") == 1
+    assert actions.count("JOB_RETRY_SCHEDULED") == 2
+    assert actions.count("JOB_DEAD_LETTER") == 1
+    assert actions.count("JOB_REPLAYED") == 1
+    assert actions.count("FILE_READY") == 1
+    replay_event = next(event for event in events if event.action == "JOB_REPLAYED")
+    assert replay_event.actor_id == OWNER_ID
+
+
+def test_operator_replay_rejects_non_dead_letter_job(tmp_path: Path) -> None:
+    application = create_app(settings_for(tmp_path))
+    with TestClient(application) as client:
+        upload(client, b"synthetic", "text/plain")
+        _, job, _ = database_records(application.state.session_factory)
+        replay = client.post(f"/api/v1/operations/jobs/{job.id}/replay", headers=bearer())
+
+    assert replay.status_code == 409
+    assert replay.json()["detail"] == "Only dead-letter jobs can be replayed."

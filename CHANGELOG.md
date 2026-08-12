@@ -8,6 +8,8 @@
 - Add content validation for safe synthetic PDF, JSON, and text examples,
   idempotent upload replay, retry behavior, stale-claim recovery, and
   dead-letter handling.
+- Add operator-only dead-letter replay with state guards, attempt reset,
+  preserved job IDs, and `JOB_REPLAYED` audit records.
 - Add Alembic-managed schema lifecycle, problem-detail responses, structured
   request/job logs, hash-locked runtime/dev dependencies, and local worker plus
   daemon entry points.

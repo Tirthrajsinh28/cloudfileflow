@@ -12,7 +12,8 @@ valid objects, rejects malformed content, retries transient failures with
 exponential delay, recovers stale claims, and moves exhausted jobs to a
 dead-letter state. Owners can inspect status/audit history and download only
 `READY` content; a separately configured operator can inspect bounded job
-counts and sanitized dead-letter records.
+counts, sanitized dead-letter records, and replay dead-letter jobs through an
+audited state-guarded endpoint.
 
 Alembic manages the SQLite schema, HTTP errors use problem details, and
 request/job events are JSON-structured with bounded correlation IDs. No cloud
@@ -27,7 +28,7 @@ The local vertical slice uses:
 - Size, media-type, filename, and content checks before a file becomes
   downloadable.
 - Idempotent upload requests, durable job state, audit records, retries, and a
-  dead-letter state.
+  dead-letter state with operator-only replay.
 
 SQLite and the local filesystem are development adapters, not evidence of AWS
 S3, SQS, Lambda, or malware-scanner execution.
@@ -49,6 +50,7 @@ demonstration flow, and security reporting policy.
 | `GET /api/v1/files/{id}/audit` | Owner-scoped chronological audit events. |
 | `GET /api/v1/files/{id}/content` | Attachment download for `READY` content only. |
 | `GET /api/v1/operations/jobs` | Configured-operator counts and bounded dead letters. |
+| `POST /api/v1/operations/jobs/{id}/replay` | Configured-operator replay for `DEAD_LETTER` jobs only. |
 
 OpenAPI is available at `/docs` and `/openapi.json`.
 
@@ -108,7 +110,7 @@ Run the current gate:
 .\.venv\Scripts\pip-audit.exe --skip-editable
 ```
 
-The latest local gate has 34 passing tests and 90% reported coverage. That
+The latest local gate has 36 passing tests and 90% reported coverage. That
 evidence covers the local adapters and current API/worker paths only. It
 does not prove PostgreSQL, S3, SQS, LocalStack, container, CI, or deployment
 behavior.

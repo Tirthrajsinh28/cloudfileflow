@@ -21,7 +21,7 @@ Status: Initial design review. This is not a security guarantee.
 | Active/malicious content | Quarantine by default; never execute, render, or deserialize uploaded objects; document that signature checks are not malware scanning. |
 | Cross-owner access / IDOR | Derive owner from validated JWT `sub`; scope metadata and downloads by owner at query time. |
 | Replay / duplicate events | Require bounded idempotency key; unique owner/key constraint; stable job ID. |
-| Retry storm | Bounded attempts, exponential delay, batch limits, terminal dead-letter state. |
+| Retry storm | Bounded attempts, exponential delay, batch limits, terminal dead-letter state, and operator-only dead-letter replay. |
 | Partial database/storage failure | Temporary file plus atomic rename; compensate storage on transaction failure; reconciliation remains future work. |
 | Secret leakage | Environment-only secret, redacted errors, no token/file-body logging, `.env` ignored. |
 | Zip/archive bomb | Archives are outside the first allowlist. |
@@ -38,4 +38,4 @@ Status: Initial design review. This is not a security guarantee.
 ## Review triggers
 
 Revisit this model before adding archives, images, office documents, cloud
-presigned URLs, external callbacks, operator replay, or a public deployment.
+presigned URLs, external callbacks, reconciliation automation, or a public deployment.

@@ -21,6 +21,7 @@ bounded visibility into retries and dead-letter jobs.
 - Metadata, processing job, and audit row committed together.
 - Worker validation, SHA-256 digest, retry, and dead-letter state.
 - Owner-scoped metadata and authorized download after processing.
+- Operator-only dead-letter inspection and audited replay.
 - Structured logs and health endpoint.
 
 ## State model
@@ -40,10 +41,11 @@ Job: `PENDING -> PROCESSING -> COMPLETED`, with failures returning to
 - `VERIFIED` State, job, and audit writes are transactional.
 - `VERIFIED` Downloads never expose quarantine paths.
 - `VERIFIED` Retries are bounded and observable.
+- `VERIFIED` Dead-letter replay is operator-only, state-guarded, and audited.
 - `VERIFIED` Tests use only generated synthetic fixtures.
 - `VERIFIED` Local adapters are labeled; AWS behavior is not claimed.
 
 ## Deferred
 
 S3/SQS/LocalStack adapters, multipart cloud upload, real malware scanning,
-presigned URLs, operator replay, web dashboard, containers, CI, and deployment.
+presigned URLs, reconciliation, web dashboard, containers, CI, and deployment.

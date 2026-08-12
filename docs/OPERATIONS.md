@@ -11,7 +11,7 @@ current Docker-less environment.
 | `CLOUDFILEFLOW_STORAGE_ROOT` | No | Private quarantine, clean, and rejected-object root. |
 | `CLOUDFILEFLOW_JWT_SECRET` | Yes | Development HS256 key, at least 32 characters. |
 | `CLOUDFILEFLOW_JWT_ISSUER` | No | Required token issuer. |
-| `CLOUDFILEFLOW_OPERATOR_OWNER_ID` | For operator API | UUID allowed to read global job operations. |
+| `CLOUDFILEFLOW_OPERATOR_OWNER_ID` | For operator API | UUID allowed to read global job operations and replay dead-letter jobs. |
 | `CLOUDFILEFLOW_MAX_FILE_BYTES` | No | Streaming byte limit, 1 byte through 25 MiB. |
 | `CLOUDFILEFLOW_WORKER_MAX_ATTEMPTS` | No | Retry ceiling, 1 through 10. |
 | `CLOUDFILEFLOW_WORKER_RETRY_BASE_SECONDS` | No | Exponential-delay base. |
@@ -81,7 +81,11 @@ recovery, or reconciliation command exists.
 
 - SQLite/filesystem are local adapters, not multi-node or cloud durability.
 - One polling worker is the reviewed topology.
-- Failed jobs are inspectable but cannot be replayed.
+- Dead-letter jobs are inspectable and can be replayed only by the configured
+  operator through `POST /api/v1/operations/jobs/{job_id}/replay`. Replay
+  preserves the job ID, resets attempts for a new processing cycle, clears the
+  sanitized last error, schedules immediate retry, and records `JOB_REPLAYED`
+  with the operator actor ID.
 - Reconciliation, rate limiting, metrics export, alerting, S3/SQS/LocalStack,
   real malware scanning, and external deployment are pending.
 - JSON logs intentionally exclude tokens, query strings, filenames, bodies,

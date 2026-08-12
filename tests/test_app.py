@@ -128,12 +128,16 @@ def test_openapi_matches_routes_and_bearer_boundary(tmp_path: Path) -> None:
         "/api/v1/files/{file_id}/audit",
         "/api/v1/files/{file_id}/content",
         "/api/v1/operations/jobs",
+        "/api/v1/operations/jobs/{job_id}/replay",
     }
     scheme = document["components"]["securitySchemes"]["HTTPBearer"]
     assert scheme == {"type": "http", "scheme": "bearer"}
     assert "security" not in document["paths"]["/health"]["get"]
     assert document["paths"]["/api/v1/files"]["post"]["security"] == [{"HTTPBearer": []}]
     assert document["paths"]["/api/v1/operations/jobs"]["get"]["security"] == [{"HTTPBearer": []}]
+    assert document["paths"]["/api/v1/operations/jobs/{job_id}/replay"]["post"]["security"] == [
+        {"HTTPBearer": []}
+    ]
 
 
 def test_validation_and_missing_routes_use_problem_details(tmp_path: Path) -> None:

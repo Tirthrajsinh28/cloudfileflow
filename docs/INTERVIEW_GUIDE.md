@@ -57,7 +57,7 @@ implemented and the cost ceiling is CAD 0.
 ## Monitoring and security
 
 JSON request/job events, correlation IDs, health, bounded error classes,
-operator counts, and dead-letter inspection are implemented. There is no
+operator counts, dead-letter inspection, and audited dead-letter replay are implemented. There is no
 metrics exporter, alerting system, or external log sink. Use the threat model;
 never call signature validation malware scanning.
 
@@ -71,9 +71,9 @@ never call signature validation malware scanning.
 ## Known limitations and future improvements
 
 Known limits include local symmetric JWTs, SQLite/filesystem adapters,
-whole-object bounded validation in the worker, no reconciliation command, no
-operator replay, and no rate limiting. Future work includes LocalStack,
-PostgreSQL, a real scanning adapter, reconciliation, operator replay,
+whole-object bounded validation in the worker, no reconciliation command, and
+no rate limiting. Future work includes LocalStack,
+PostgreSQL, a real scanning adapter, reconciliation,
 containers, CI, metrics, and deployment.
 
 ## Two-minute explanation
@@ -83,14 +83,14 @@ that uploads are untrusted. The local slice authenticates a synthetic owner,
 streams a small allowlisted document into quarantine, commits metadata, a
 durable job, and an audit record, then lets a bounded worker validate and
 promote it for authorized download. It demonstrates idempotency, retries,
-dead-letter handling, auditability, and IDOR protection. SQLite and the
+dead-letter handling, operator replay, auditability, and IDOR protection. SQLite and the
 filesystem are explicitly local adapters, not AWS evidence.
 
 ## Five-minute technical explanation
 
 Cover trust boundaries, 64 KiB upload chunks, generated keys, the
 storage/database compensation boundary, atomic state-guarded claims,
-exponential retry, stale recovery, dead-letter state, audit events, ownership
+exponential retry, stale recovery, dead-letter replay, audit events, ownership
 queries, migration verification, structured logs, and the later S3/SQS adapter
 contract.
 
@@ -102,7 +102,7 @@ contract.
 4. Run `cloudfileflow-worker` once.
 5. Inspect `READY` metadata, completed job, and chronological audit.
 6. Download as the owner and show cross-owner HTTP 404.
-7. Use a test adapter failure to explain retry and dead-letter evidence.
+7. Use a test adapter failure to explain retry, dead-letter, and replay evidence.
 8. End by stating that LocalStack, Docker, CI, and deployment remain pending.
 
 ## Likely questions and honest answer framework

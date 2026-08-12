@@ -29,6 +29,9 @@ documents, candidate records, access tokens, `.env` values, or private logs.
 - Job retries, stale-claim recovery, and dead-letter states are bounded.
 - Operator job views are explicitly configured and omit owner IDs, filenames,
   file content, and raw exception messages.
+- Dead-letter replay is limited to the configured operator UUID, accepts only
+  jobs still in `DEAD_LETTER`, preserves the original job ID, and writes an
+  audit record for the operator action.
 - Runtime and development dependencies are hash-locked for local verification.
 
 ## Current limitations
@@ -36,4 +39,4 @@ documents, candidate records, access tokens, `.env` values, or private logs.
 - Content checks are signature/syntax checks, not malware detection.
 - Local SQLite/filesystem adapters are not AWS S3/SQS/Lambda evidence.
 - Docker/LocalStack, remote GitHub Actions, cloud deployment, key rotation,
-  rate limits, reconciliation, and replay controls remain future work.
+  rate limits, and reconciliation remain future work.

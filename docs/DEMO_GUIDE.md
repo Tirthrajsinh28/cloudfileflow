@@ -13,7 +13,8 @@ credentials, confidential files, or malware samples.
   exposes owner-scoped status.
 - Downloads are available only after a file reaches `READY`.
 - The operator endpoint exposes sanitized job counts/dead letters without file
-  bodies, filenames, owner identifiers, or raw exception messages.
+  bodies, filenames, owner identifiers, or raw exception messages, and can
+  replay dead-letter jobs through an audited state-guarded endpoint.
 - SQLite/filesystem adapters are explicitly local substitutes, not cloud
   execution evidence.
 
@@ -89,8 +90,8 @@ LocalStack/cloud-emulator behavior, remote CI, and deployment remain pending.
 untrusted. The API streams a bounded synthetic file into quarantine, stores
 metadata and a processing job transactionally, and a worker validates content
 before promotion. The interesting engineering pieces are idempotency, retry and
-dead-letter state, owner-scoped reads, audit history, and sanitized operator
-visibility. The current implementation uses SQLite and the filesystem as
+dead-letter state, owner-scoped reads, audit history, sanitized operator
+visibility, and audited replay. The current implementation uses SQLite and the filesystem as
 honest local adapters; Docker, LocalStack, cloud services, remote CI, and
 deployment are not claimed until those checks run.”
 

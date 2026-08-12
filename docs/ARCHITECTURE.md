@@ -23,7 +23,8 @@ flowchart LR
 - `jobs`: durable claim/retry/dead-letter behavior.
 - `audit`: immutable-intent application events.
 - `configuration`: required secrets, limits, and paths.
-- `operations`: fail-closed job counts and sanitized dead-letter inspection.
+- `operations`: fail-closed job counts, sanitized dead-letter inspection, and
+  state-guarded replay.
 - `migrations`: explicit Alembic revision checks and schema upgrades.
 
 The initial database-backed queue is a local development substitute. An SQS
