@@ -12,7 +12,7 @@ license = "MIT"
 dependencies = [
   "alembic==1.18.5",
   "fastapi==0.139.0",
-  "PyJWT==2.13.0",
+  "PyJWT==2.15.0",
   "pydantic-settings==2.14.2",
   "python-multipart==0.0.32",
   "SQLAlchemy==2.0.51",
